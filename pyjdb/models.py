@@ -83,6 +83,21 @@ class ModelMeta(ABCMeta):
         }
         return super().__new__(mcs, name, bases, new_namespace, **kwargs)
 
+    def __instancecheck__(self, inst: Any) -> bool:
+        """
+        Try to avoid calling the _abc_subclasscheck unless it's necessary.
+
+        See https://github.com/python/cpython/issues/92810
+        """
+        # From what I have seen in the pydantic and other users report,
+        # it seems that '__isinstancecheck__' method of ABC can be very
+        # slow and even lead to memory leakage, particularly when the checks
+        # return `False`. So we need to first make sure that the instance
+        # has a '__fields__' attribute and then call the '_abc_subclasscheck',
+        # otherwise it returns 'False' immediately.
+
+        return hasattr(inst, _FIELDS_KEY) and super().__instancecheck__(inst)
+
 
 object_setattr = object.__setattr__
 
