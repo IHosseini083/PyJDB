@@ -6,7 +6,7 @@ __all__ = [
 ]
 
 
-class JsonDBErrorMixin:
+class PyJDBErrorMixin:
     msg_template: str
 
     def __init__(self, **context: Any) -> None:
@@ -16,22 +16,22 @@ class JsonDBErrorMixin:
         return self.msg_template.format(**self.__dict__)
 
 
-class JsonDBValueError(JsonDBErrorMixin, ValueError):
+class PyJDBValueError(PyJDBErrorMixin, ValueError):
     pass
 
 
-class JsonDBTypeError(JsonDBErrorMixin, TypeError):
+class PyJDBTypeError(PyJDBErrorMixin, TypeError):
     pass
 
 
-class InvalidFormatError(JsonDBValueError):
+class InvalidFormatError(PyJDBValueError):
     msg_template = "invalid format {fmt!r} must be one of: {allowed}"
 
     def __init__(self, *, fmt: str, allowed: Iterable[str]) -> None:
         super().__init__(fmt=fmt, allowed=allowed)
 
 
-class DuplicateConfigError(JsonDBTypeError):
+class DuplicateConfigError(PyJDBTypeError):
     msg_template = (
         "Specifying config in two different places is confusing, "
         "you can either define a Config attribute or use class kwargs."
