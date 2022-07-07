@@ -13,7 +13,8 @@ from typing import (
 
 import typesystem
 
-from .errors import InvalidFormatError
+from .errors import InvalidFormatError, parse_typesystem_validation_error
+from .types import FieldValue
 
 if TYPE_CHECKING:
     from .config import BaseConfig
@@ -78,8 +79,13 @@ class ModelField(Repr, Generic[_T], ABC):
         self.validator = self.get_validator(**kwargs)
         # Validate the default value if it's not None.
         if default is not None:
-            # TODO: Handle ValidationError for default value.
-            self.validator.validate(default)
+            try:
+                self.validator.validate(default)
+            except typesystem.ValidationError as e:
+                raise parse_typesystem_validation_error(
+                    e,
+                    FieldValue(name="default", value=default),
+                ) from None
 
     def get_validator(self, **kwargs) -> typesystem.Field:
         raise NotImplementedError()
@@ -96,8 +102,14 @@ class ModelField(Repr, Generic[_T], ABC):
         return inst.__data__[self.name]
 
     def __set__(self, inst: "Model", value: _T) -> None:
-        # validate new value before setting it to the model
-        inst.__data__[self.name] = self.validator.validate(value)
+        # Validate new value before setting it to the model
+        try:
+            inst.__data__[self.name] = self.validator.validate(value)
+        except typesystem.ValidationError as e:
+            raise parse_typesystem_validation_error(
+                e,
+                FieldValue(name=self.name, value=value),
+            ) from None
 
     def __delete__(self, inst: "Model") -> None:
         del inst.__data__[self.name]

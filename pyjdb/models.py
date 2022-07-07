@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterator, Tuple, Type, no_type_chec
 import typesystem
 
 from .config import BaseConfig, inherit_config
-from .errors import DuplicateConfigError
+from .errors import DuplicateConfigError, parse_typesystem_validation_error
 from .fields import ModelField
 from .utils import Repr
 
@@ -29,7 +29,13 @@ def validate_kwargs(
     schema: typesystem.Schema,
     fields: Dict[str, ModelField],
 ) -> "DictStrAny":
-    kwargs = schema.validate(kwargs)
+    try:
+        kwargs = schema.validate(kwargs)
+    except typesystem.ValidationError as e:
+        raise parse_typesystem_validation_error(
+            e,
+            kwargs,
+        ) from None
     for key, value in fields.items():
         if value.validator.read_only and value.validator.has_default():
             kwargs[key] = value.validator.get_default_value()
