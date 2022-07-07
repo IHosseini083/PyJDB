@@ -33,7 +33,7 @@ class PyJDBTypeError(PyJDBErrorMixin, TypeError):
 
 
 class InvalidFormatError(PyJDBValueError):
-    msg_template = "invalid format {fmt!r} must be one of: {allowed}"
+    msg_template = "invalid format {fmt!r}, must be one of: {allowed}"
 
     def __init__(self, *, fmt: str, allowed: Iterable[str]) -> None:
         super().__init__(fmt=fmt, allowed=allowed)
