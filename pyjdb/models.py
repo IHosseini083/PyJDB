@@ -1,6 +1,16 @@
 from abc import ABCMeta
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, Iterator, Tuple, Type, no_type_check
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterator,
+    Optional,
+    Tuple,
+    Type,
+    no_type_check,
+)
 
 import typesystem
 
@@ -47,12 +57,15 @@ class ModelMeta(ABCMeta):
     def __new__(mcs, name: str, bases: tuple, namespace: dict, **kwargs):
         fields: Dict[str, ModelField] = {}
         config = BaseConfig
+        hash_function: Optional[Callable[[Any], int]] = None
 
         # Update attributes from base classes
         for base in reversed(bases):
             if hasattr(base, _FIELDS_KEY):
                 fields.update(deepcopy(base.__fields__))
                 config = inherit_config(base.__config__, config)
+                hash_function = base.__hash__
+
         # If the model is not BaseModel get its fields.
         module, qualname = namespace.get("__module__"), namespace.get("__qualname__")
         if (module, qualname) != ("jsondb.models", "BaseModel"):
@@ -79,12 +92,21 @@ class ModelMeta(ABCMeta):
         if not collection:
             collection = qualname.lower()
 
+        # If the '__hash__' method is not found and the model is meant
+        # to be frozen/immutable (based on user configs), create a hash function for model.
+        if not hash_function and config.frozen:
+            # This is what makes the model hashable.
+            def hash_function(obj: "BaseModel") -> int:
+                # Generate unique hash value from model and its fields value.
+                return hash(obj.__class__) + hash(tuple(obj.__data__.values()))
+
         # Create new namespace from generated attributes.
         new_namespace = {
             _FIELDS_KEY: fields,
             _COLLECTION_KEY: collection,
             _SCHEMA_KEY: schema,
             _CONFIG_KEY: config,
+            "__hash__": hash_function,
             **namespace,
         }
         return super().__new__(mcs, name, bases, new_namespace, **kwargs)
@@ -125,3 +147,10 @@ class BaseModel(Repr, metaclass=ModelMeta):
 
     def __repr_args__(self) -> "ReprArgs":
         return [(k, v) for k, v in self.__data__.items() if self.__fields__[k].repr_]
+
+    def __eq__(self, other: Any) -> bool:
+        # This logic and even the used methods may change later.
+        if isinstance(other, BaseModel):
+            return self.__data__ == other.__data__
+        else:
+            return self.__data__ == other
