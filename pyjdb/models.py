@@ -68,7 +68,7 @@ class ModelMeta(ABCMeta):
 
         # If the model is not BaseModel get its fields.
         module, qualname = namespace.get("__module__"), namespace.get("__qualname__")
-        if (module, qualname) != ("jsondb.models", "BaseModel"):
+        if (module, qualname) != ("pyjdb.models", "BaseModel"):
             for field_name, field in iter_fields(namespace):
                 fields[field_name] = field
 
