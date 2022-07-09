@@ -36,6 +36,8 @@ isort = "^5.10.1"
 flake8 = "^4.0.1"
 autoflake = "^1.4"
 mypy = "^0.961"
+mkdocs = "^1.3.0"
+mkdocs-material = "^8.3.9"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/IHosseini083/PyJDB/issues"
