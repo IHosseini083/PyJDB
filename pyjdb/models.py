@@ -148,6 +148,10 @@ class BaseModel(Repr, metaclass=ModelMeta):
     def __repr_args__(self) -> "ReprArgs":
         return [(k, v) for k, v in self.__data__.items() if self.__fields__[k].repr_]
 
+    def __iter__(self) -> Iterator[Tuple[str, Any]]:
+        """This will add support for `dict(model)` to work."""
+        yield from self.__data__.items()
+
     def __eq__(self, other: Any) -> bool:
         # This logic and even the used methods may change later.
         if isinstance(other, BaseModel):
