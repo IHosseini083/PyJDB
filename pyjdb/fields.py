@@ -17,12 +17,8 @@ from .errors import InvalidFormatError, parse_typesystem_validation_error
 from .types import FieldValue
 
 if TYPE_CHECKING:
-    from .config import BaseConfig
     from .models import BaseModel
     from .typings import IntOrFloat, SetStr
-
-    ConfigType = Type[BaseConfig]
-    Model = TypeVar("Model", bound=BaseModel)
 
 from .utils import Repr
 
@@ -61,13 +57,13 @@ Undefined = UndefinedType()
 
 class ModelField(Repr, Generic[_T], ABC):
     name: str
-    config: "ConfigType"
+    model: Type["BaseModel"]
 
     __slots__ = (
         "name",
         "validator",
         "repr_",
-        "config",
+        "model",
     )
 
     def __init__(self, **kwargs) -> None:
@@ -90,18 +86,17 @@ class ModelField(Repr, Generic[_T], ABC):
     def get_validator(self, **kwargs) -> typesystem.Field:
         raise NotImplementedError()
 
-    def __set_name__(self, owner: Type["Model"], name: str) -> None:
-        # Set the name of the field on assignment.
+    def __set_name__(self, owner: Type["BaseModel"], name: str) -> None:
         self.name = name
-        self.config = owner.__config__
+        self.model = owner
 
-    def __get__(self, inst: Optional["Model"], owner: Type["Model"]) -> _T:
+    def __get__(self, inst: Optional["BaseModel"], owner: Type["BaseModel"]) -> _T:
         if inst is None:
             # if accessed from directly from the model, return the field itself.
             return self  # type: ignore
         return inst.__data__[self.name]
 
-    def __set__(self, inst: "Model", value: _T) -> None:
+    def __set__(self, inst: "BaseModel", value: _T) -> None:
         # Validate new value before setting it to the model
         try:
             inst.__data__[self.name] = self.validator.validate(value)
@@ -111,7 +106,7 @@ class ModelField(Repr, Generic[_T], ABC):
                 FieldValue(name=self.name, value=value),
             ) from None
 
-    def __delete__(self, inst: "Model") -> None:
+    def __delete__(self, inst: "BaseModel") -> None:
         del inst.__data__[self.name]
 
 
