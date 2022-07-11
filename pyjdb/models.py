@@ -1,4 +1,5 @@
 from abc import ABCMeta
+from collections.abc import Mapping
 from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
@@ -130,7 +131,7 @@ class ModelMeta(ABCMeta):
 object_setattr = object.__setattr__
 
 
-class BaseModel(Repr, metaclass=ModelMeta):
+class BaseModel(Repr, Mapping[str, Any], metaclass=ModelMeta):
     if TYPE_CHECKING:
         __fields__: Dict[str, ModelField]
         __collection__: str
@@ -148,13 +149,11 @@ class BaseModel(Repr, metaclass=ModelMeta):
     def __repr_args__(self) -> "ReprArgs":
         return [(k, v) for k, v in self.__data__.items() if self.__fields__[k].repr_]
 
-    def __iter__(self) -> Iterator[Tuple[str, Any]]:
-        """This will add support for `dict(model)` to work."""
-        yield from self.__data__.items()
+    def __getitem__(self, __key: str) -> Any:
+        return self.__data__[__key]
 
-    def __eq__(self, other: Any) -> bool:
-        # This logic and even the used methods may change later.
-        if isinstance(other, BaseModel):
-            return self.__data__ == other.__data__
-        else:
-            return self.__data__ == other
+    def __len__(self) -> int:
+        return len(self.__data__)
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.__data__)
