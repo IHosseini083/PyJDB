@@ -9,6 +9,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    overload,
 )
 
 import typesystem
@@ -19,6 +20,8 @@ from .types import FieldValue
 if TYPE_CHECKING:
     from .models import BaseModel
     from .typings import IntOrFloat, SetStr
+
+    from typing_extensions import Self
 
 from .utils import Repr
 
@@ -90,14 +93,25 @@ class ModelField(Repr, Generic[_T], ABC):
         self.name = name
         self.model = owner
 
-    def __get__(self, inst: Optional["BaseModel"], owner: Type["BaseModel"]) -> _T:
+    @overload
+    def __get__(self, inst: "BaseModel", owner: Type["BaseModel"]) -> _T:
+        ...
+
+    @overload
+    def __get__(self, inst: None, owner: Type["BaseModel"]) -> "Self":  # type: ignore
+        ...
+
+    def __get__(
+        self,
+        inst: Optional["BaseModel"],
+        owner: Type["BaseModel"],
+    ) -> Union[_T, "Self"]:  # type: ignore
         if inst is None:
             # if accessed from directly from the model, return the field itself.
-            return self  # type: ignore
+            return self
         return inst.__data__[self.name]
 
     def __set__(self, inst: "BaseModel", value: _T) -> None:
-        # Validate new value before setting it to the model
         try:
             inst.__data__[self.name] = self.validator.validate(value)
         except typesystem.ValidationError as e:
