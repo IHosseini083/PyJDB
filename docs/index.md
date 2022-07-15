@@ -1,4 +1,8 @@
-<h1 align="center"><a href="https://github.com/IHosseini083/PyJDB"><b>PyJDB</b></a></h1>
+<div align="center">
+<a href="https://github.com/IHosseini083/PyJDB">
+<img src="https://github.com/IHosseini083/PyJDB/blob/main/static/img/logo.png">
+</a>
+</div>
 
 Python JSON Database (PyJDB) is an ORM to easily validate JSON data and even store and use that data
 in a database-like manner. It uses [`typesystem`](https://github.com/encode/typesystem) library to power up
