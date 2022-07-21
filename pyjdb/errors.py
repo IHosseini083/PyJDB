@@ -11,6 +11,7 @@ __all__ = [
     "DuplicateConfigError",
     "ValidationError",
     "parse_typesystem_validation_error",
+    "FrozenFieldError",
 ]
 
 
@@ -44,6 +45,15 @@ class DuplicateConfigError(PyJDBTypeError):
         "Specifying config in two different places is confusing, "
         "you can either define a Config attribute or use class kwargs."
     )
+
+
+class FrozenFieldError(PyJDBTypeError):
+    msg_template = (
+        "Field {name!r} doesn't support reassignment because its model is frozen."
+    )
+
+    def __init__(self, *, name: str) -> None:
+        super().__init__(name=name)
 
 
 class ValidationError(PyJDBValueError):

@@ -14,7 +14,11 @@ from typing import (
 
 import typesystem
 
-from .errors import InvalidFormatError, parse_typesystem_validation_error
+from .errors import (
+    FrozenFieldError,
+    InvalidFormatError,
+    parse_typesystem_validation_error,
+)
 from .types import FieldValue
 
 if TYPE_CHECKING:
@@ -112,6 +116,12 @@ class ModelField(Repr, Generic[_T], ABC):
         return inst.__data__[self.name]
 
     def __set__(self, inst: "BaseModel", value: _T) -> None:
+        if inst.__config__.frozen:
+            raise FrozenFieldError(name=self.name)
+        if not inst.__config__.validate_assignment:
+            inst.__data__[self.name] = value
+            return
+
         try:
             inst.__data__[self.name] = self.validator.validate(value)
         except typesystem.ValidationError as e:
