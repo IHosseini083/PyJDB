@@ -82,9 +82,9 @@ def parse_typesystem_validation_error(
 ) -> "ValidationError":
     if isinstance(context, tuple):  # if the context is passed as a FieldValue
         context = cast("FieldValue", context)
-        errors = [(context.name, context.value, cast(str, err[""]))]
+        errors = [(context.name, context.value, next(iter(err.values())))]
     else:
-        # Use 'Mapping.get' method to prevent KeyError's in case
+        # Use 'Mapping.get' method to prevent KeyError in case
         # the field is required but user did not pass a value.
         errors = [(name, context.get(name), message) for name, message in err.items()]
     return ValidationError(errors=errors)
