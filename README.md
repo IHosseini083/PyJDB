@@ -1,4 +1,18 @@
-<h1 align="center"><a href="https://github.com/IHosseini083/PyJDB"><b>PyJDB</b></a></h1>
+<div align="center">
+<h1><a href="https://github.com/IHosseini083/PyJDB"><b>PyJDB</b></a></h1>
+<a href="https://github.com/IHosseini083/PyJDB/actions?query=workflow%3ATest+event%3Apush+branch%3Amain" target="_blank">
+    <img src="https://github.com/IHosseini083/PyJDB/actions/workflows/test.yml/badge.svg" alt="Test">
+</a>
+<a href="https://www.python.org">
+    <img src="https://img.shields.io/badge/Python-3.8+-3776AB.svg?style=flat&logo=python&logoColor=white" alt="Python">
+</a>
+<a href="https://github.com/psf/black">
+    <img src="https://img.shields.io/static/v1?label=code%20style&message=black&color=black&style=flat" alt="Code Style: black">
+</a>
+<a href="https://github.com/pre-commit/pre-commit">
+    <img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=flat" alt="pre-commit">
+</a>
+</div>
 
 Python JSON Database (PyJDB) is an ORM to easily validate JSON data and even store and use that data
 in a database-like manner. It uses [`typesystem`](https://github.com/encode/typesystem) library to power up
