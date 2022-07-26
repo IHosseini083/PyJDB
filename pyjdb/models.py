@@ -182,3 +182,6 @@ class BaseModel(Repr, Mapping[str, Any], metaclass=ModelMeta):
             return self[__key]
         except FieldNotFoundError:
             return default
+
+    def __bool__(self) -> bool:
+        return bool(self.__data__)

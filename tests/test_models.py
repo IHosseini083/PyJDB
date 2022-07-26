@@ -76,6 +76,11 @@ def test__iter__(multi_field_model: BaseModel, bare_model: BaseModel) -> None:
     iter(bare_model)
 
 
+def test__bool__(multi_field_model: BaseModel, bare_model: BaseModel) -> None:
+    assert multi_field_model
+    assert not bare_model
+
+
 def test_membership(multi_field_model: BaseModel) -> None:
     assert "s" in multi_field_model
     assert "4" not in multi_field_model
