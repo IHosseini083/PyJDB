@@ -12,6 +12,7 @@ __all__ = [
     "ValidationError",
     "parse_typesystem_validation_error",
     "FrozenFieldError",
+    "FieldNotFoundError",
 ]
 
 
@@ -54,6 +55,13 @@ class FrozenFieldError(PyJDBTypeError):
 
     def __init__(self, *, name: str) -> None:
         super().__init__(name=name)
+
+
+class FieldNotFoundError(PyJDBValueError):
+    msg_template = "Model {ob_name!r} has no field {field_name!r}"
+
+    def __init__(self, *, ob_name: str, field_name: str) -> None:
+        super().__init__(ob_name=ob_name, field_name=field_name)
 
 
 class ValidationError(PyJDBValueError):

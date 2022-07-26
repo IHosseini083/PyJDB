@@ -7,6 +7,7 @@ from typing import (
     Callable,
     Dict,
     Iterator,
+    NoReturn,
     Optional,
     Tuple,
     Type,
@@ -16,7 +17,11 @@ from typing import (
 import typesystem
 
 from .config import BaseConfig, inherit_config
-from .errors import DuplicateConfigError, parse_typesystem_validation_error
+from .errors import (
+    DuplicateConfigError,
+    FieldNotFoundError,
+    parse_typesystem_validation_error,
+)
 from .fields import ModelField
 from .utils import Repr
 
@@ -150,10 +155,30 @@ class BaseModel(Repr, Mapping[str, Any], metaclass=ModelMeta):
         return [(k, v) for k, v in self.__data__.items() if self.__fields__[k].repr_]
 
     def __getitem__(self, __key: str) -> Any:
-        return self.__data__[__key]
+        try:
+            value = self.__data__[__key]
+        except KeyError:
+            return self.__missing__(__key)
+        else:
+            return value
+
+    def __missing__(self, __key: str) -> NoReturn:
+        raise FieldNotFoundError(
+            ob_name=self.__repr_name__(),
+            field_name=__key,
+        ) from None
 
     def __len__(self) -> int:
         return len(self.__data__)
 
     def __iter__(self) -> Iterator[str]:
         return iter(self.__data__)
+
+    def __contains__(self, __key: Any) -> bool:
+        return __key in self.__data__
+
+    def get(self, __key: str, default: Any = None) -> Any:
+        try:
+            return self[__key]
+        except FieldNotFoundError:
+            return default

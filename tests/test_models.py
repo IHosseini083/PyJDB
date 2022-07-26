@@ -2,6 +2,7 @@ import pytest
 import typesystem
 
 from pyjdb import BaseModel, Boolean, Float, Integer, String
+from pyjdb.errors import FieldNotFoundError
 from pyjdb.models import _COLLECTION_KEY, _CONFIG_KEY, _FIELDS_KEY, _SCHEMA_KEY  # noqa
 
 
@@ -60,6 +61,9 @@ def test_dict_conversion(multi_field_model: BaseModel) -> None:
 def test__getitem__(multi_field_model: BaseModel) -> None:
     for k, v in default_values.items():
         assert multi_field_model[k] == v
+
+    with pytest.raises(FieldNotFoundError):
+        multi_field_model["x"]  # noqa
 
 
 def test__len__(multi_field_model: BaseModel, bare_model: BaseModel) -> None:
