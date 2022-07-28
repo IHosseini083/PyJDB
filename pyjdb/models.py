@@ -177,9 +177,9 @@ class BaseModel(Repr, Mapping[str, Any], metaclass=ModelMeta):
     def __contains__(self, __key: Any) -> bool:
         return __key in self.__data__
 
-    def get(self, __key: str, default: Any = None) -> Any:
+    def get(self, key: str, default: Any = None, /) -> Any:
         try:
-            return self[__key]
+            return self[key]
         except FieldNotFoundError:
             return default
 
